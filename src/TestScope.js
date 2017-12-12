@@ -35,18 +35,33 @@ export default class TestScope {
     
     const start = new Date();
     console.log(`Cavy test suite started at ${start}.`);
+    const testResults = [];
 
     for (let i = 0; i < this.testCases.length; i++) {
-      let {description, f} = this.testCases[i];
+      let { description, f, describeLabel, itLabel } = this.testCases[i];
+      let result;
+      let errorMsg;
       try {
         await f.call(this);
-        console.log(`${description}  ✅`);
+        result = "pass";
       } catch (e) {
-        console.warn(`${description}  ❌\n   ${e.message}`);
+        result = "fail";
+        errorMsg = e.message;
       }
+      if (result === "pass") {
+        console.log(`${description}  ✅`);
+      } else {
+        console.warn(`${description}  ❌\n   ${errorMsg}`);
+      }
+      const resultData = { result, describeLabel, itLabel, errorMsg };
+      this.component.props.onCaseFinished(resultData);
+      testResults.push(resultData);
+
       await this.component.clearAsync();
       this.component.reRender();
     }
+
+    this.component.props.onSuiteFinished(testResults);
 
     const stop = new Date();
     const duration = (stop - start) / 1000;
@@ -124,7 +139,12 @@ export default class TestScope {
   // See example above.
   it(label, f) {
     const description = `${this.describeLabel}: ${label}`;
-    this.testCases.push({description, f});
+    this.testCases.push({
+      description,
+      f,
+      describeLabel: this.describeLabel,
+      itLabel: label,
+    });
   }
 
   // Public: Fill in a `TextInput`-compatible component with a string value.

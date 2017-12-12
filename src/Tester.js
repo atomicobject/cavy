@@ -102,7 +102,9 @@ Tester.propTypes = {
   specs: PropTypes.arrayOf(PropTypes.func),
   waitTime: PropTypes.number,
   startDelay: PropTypes.number,
-  clearAsyncStorage: PropTypes.bool
+  clearAsyncStorage: PropTypes.bool,
+  onCaseFinished: PropTypes.func,
+  onSuiteFinished: PropTypes.func,
 };
 
 Tester.childContextTypes = {
@@ -112,5 +114,7 @@ Tester.childContextTypes = {
 Tester.defaultProps = {
   waitTime: 2000,
   startDelay: 0,
-  clearAsyncStorage: false
+  clearAsyncStorage: false,
+  onCaseFinished: () => {},
+  onSuiteFinished: () => {},
 }
