@@ -6,12 +6,11 @@
 class ComponentNotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'ComponentNotFoundError';
+    this.name = "ComponentNotFoundError";
   }
-};
+}
 
 export default class TestScope {
-
   constructor(component, waitTime, startDelay) {
     this.component = component;
     this.testHooks = component.testHookStore;
@@ -32,10 +31,15 @@ export default class TestScope {
     if (this.startDelay) {
       await this.pause(this.startDelay);
     }
-    
+
     const start = new Date();
     console.log(`Cavy test suite started at ${start}.`);
     const testResults = [];
+
+    if (this.component.props.clearAsyncStorage) {
+      console.log("Clearing AsyncStorage before test run");
+      await this.component.clearAsync();
+    }
 
     for (let i = 0; i < this.testCases.length; i++) {
       let { description, f, describeLabel, itLabel } = this.testCases[i];
@@ -65,7 +69,9 @@ export default class TestScope {
 
     const stop = new Date();
     const duration = (stop - start) / 1000;
-    console.log(`Cavy test suite stopped at ${stop}, duration: ${duration} seconds.`);
+    console.log(
+      `Cavy test suite stopped at ${stop}, duration: ${duration} seconds.`
+    );
   }
 
   // Public: Find a component by its test hook identifier. Waits
@@ -96,7 +102,11 @@ export default class TestScope {
           return resolve(component);
         } else {
           if (Date.now() - startTime >= this.waitTime) {
-            reject(new ComponentNotFoundError(`Could not find component with identifier ${identifier}`));
+            reject(
+              new ComponentNotFoundError(
+                `Could not find component with identifier ${identifier}`
+              )
+            );
             clearInterval(loop);
           }
         }
@@ -143,7 +153,7 @@ export default class TestScope {
       description,
       f,
       describeLabel: this.describeLabel,
-      itLabel: label,
+      itLabel: label
     });
   }
 
@@ -156,7 +166,7 @@ export default class TestScope {
   // Returns a promise, use await when calling this function. Promise will be
   // rejected if the component is not found.
   async fillIn(identifier, str) {
-    const component =  await this.findComponent(identifier);
+    const component = await this.findComponent(identifier);
     component.props.onChangeText(str);
   }
 
@@ -207,8 +217,8 @@ export default class TestScope {
   async notExists(identifier) {
     try {
       await this.findComponent(identifier);
-    } catch(e) {
-      if (e.name == 'ComponentNotFoundError') {
+    } catch (e) {
+      if (e.name == "ComponentNotFoundError") {
         return true;
       }
       throw e;
