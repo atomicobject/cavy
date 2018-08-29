@@ -45,10 +45,14 @@ export default class TestScope {
       let { description, f, describeLabel, itLabel } = this.testCases[i];
       let result;
       let errorMsg;
+      let startTime = new Date();
+      let endTime;
       try {
         await f.call(this);
+        endTime = new Date();
         result = "pass";
       } catch (e) {
+        endTime = new Date();
         result = "fail";
         errorMsg = e.message;
       }
@@ -57,7 +61,8 @@ export default class TestScope {
       } else {
         console.warn(`${description}  ❌\n   ${errorMsg}`);
       }
-      const resultData = { result, describeLabel, itLabel, errorMsg };
+      const time = (endTime.getTime() - startTime.getTime()) / 1000;
+      const resultData = { result, describeLabel, itLabel, errorMsg, time };
       this.component.props.onCaseFinished(resultData);
       testResults.push(resultData);
 
